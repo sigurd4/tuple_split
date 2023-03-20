@@ -12,4 +12,4 @@ repository = "https://github.com/sigurd4/tuple_split"
 
 [dependencies]
 tupleops = {version = "0.1.1", features = ["concat"]}
-blk_count_macro = "0.1.0"
+blk_count_macro = "0.1.1"
