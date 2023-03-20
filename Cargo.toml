@@ -1,0 +1,13 @@
+[package]
+name = "tuple_split"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "An extension for the tupleops crate which adds a trait for splitting tuples by an index."
+repository = "https://github.com/sigurd4/tuple_split"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+tupleops = {version = "0.1.1", features = ["concat"]}
+blk_count_macro = "0.1.0"
