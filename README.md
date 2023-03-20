@@ -1,0 +1,1 @@
+This crate an extension for the tupleops crate, which adds a trait for splitting tuples by an index.

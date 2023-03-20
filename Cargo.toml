@@ -1,8 +1,10 @@
 [package]
 name = "tuple_split"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 license = "MIT"
+keywords = ["tuple", "split", "separate", "tupleops", "const", "trait"]
+categories = ["no-std", "rust-patterns"]
 description = "An extension for the tupleops crate which adds a trait for splitting tuples by an index."
 repository = "https://github.com/sigurd4/tuple_split"
 
