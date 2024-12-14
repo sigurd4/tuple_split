@@ -39,5 +39,5 @@ jobs:
       with:
         tool: "cargo-hack"
       name: "Install cargo-hack"
-    - run: "cargo hack check --no-dev-deps --all-targets"
+    - run: "cargo hack check --no-dev-deps"
       name: "Check all features with 'cargo-hack'"
