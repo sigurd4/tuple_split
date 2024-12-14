@@ -10,6 +10,21 @@ repository = "https://github.com/sigurd4/tuple_split"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[features]
+default = []
+dont_hurt_yourself_by_using_all_features = []
+8 = []
+16 = ["8"]
+32 = ["16"]
+64 = ["32"]
+96 = ["64"]
+128 = ["96"]
+160 = ["128"]
+192 = ["160"]
+224 = ["192"]
+256 = ["224"]
+
+
 [dependencies]
 tupleops = {version = "0.1.1", features = ["concat"]}
 blk_count_macro = "0.1.1"
