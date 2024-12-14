@@ -6,41 +6,52 @@
 #![feature(tuple_trait)]
 #![cfg_attr(feature = "128", recursion_limit = "256")]
 
-//! This crate is an extension for the [tupleops](tupleops) crate,
-//! which adds a trait for splitting tuples by index.
+//!
+//! This crate an extension for the [tupleops](tupleops) crate.
+//!
+//! [tupleops](tupleops) contains many useful features for manipulating tuples andusing tuples in generic code.
+//! However, it does not support any kind of splitting of tuples. This crate adds that feature.
+//!
+//! # Examples
 //!
 //! Tuples which may be split at index MIDDLE have the trait [TupleSplit](crate::TupleSplit)<MIDDLE>,
 //! which, when split, returns ([TupleSplit::Left](TupleSplit::Left), [TupleSplit::Right](TupleSplit::Right)).
 //!
-//! Type alias [Left](Left) and [Right](Right) equal [TupleSplit::Left](TupleSplit::Left) and [TupleSplit::Right](TupleSplit::Right) respectively.
-//! fpr any tuple which implements [TupleSplit](crate::TupleSplit) at the given MIDDLE.
-//!
-//! The trait alias [SplitLeftInto](SplitLeftInto) is implemented for any tuple which may be split where [TupleSplit::Left](TupleSplit::Left) = L.
-//!
-//! The trait alias [SplitRightInto](SplitRightInto) is implemented for any tuple which may be split where [TupleSplit::Right](TupleSplit::Right) = R.
-//!
-//! The trait alias [SplitInto](SplitInto) is implemented for any tuple which may be split where [TupleSplit::Left](TupleSplit::Left) = L and
-//! [TupleSplit::Right](TupleSplit::Right) = R.
+//! They can lso be split by specifying either of the sides or both.
 //!
 //! ```rust
-//! use tupleops::concat_tuples;
-//! use tuple_split::*;
+//! let t: (u8, f32, &str) = (32, 0.707, "test");
 //!
-//! let t: (u8, f32, &str) = (1, 1.0, "test");
+//! // Splitting tuples by index
+//! let (l, r): ((), (u8, f32, &str)) = tuple_split::split_tuple_at::<0, _>(t);
+//! assert_eq!(t, tupleops::concat_tuples(l, r));
 //!
-//! let (l, r): ((u8, f32), (&str,)) = TupleSplit::<2>::split_tuple(t);
+//! let (l, r): ((u8,), (f32, &str)) = tuple_split::split_tuple_at::<1, _>(t);
+//! assert_eq!(t, tupleops::concat_tuples(l, r));
 //!
-//! assert_eq!(t, concat_tuples(l, r));
+//! let (l, r): ((u8, f32), (&str,)) = tuple_split::split_tuple_at::<2, _>(t);
+//! assert_eq!(t, tupleops::concat_tuples(l, r));
 //!
-//! let (l, r): ((u8, f32), (&str,)) = split_tuple::<2, _>(t);
+//! let (l, r): ((u8, f32, &str), ()) = tuple_split::split_tuple_at::<3, _>(t);
+//! assert_eq!(t, tupleops::concat_tuples(l, r));
 //!
-//! assert_eq!(t, concat_tuples(l, r));
+//! // Splitting tuples given a left side
+//! let (l, r): ((u8, f32), (&str,)) = tuple_split::split_tuple_into_left::<(u8, f32)>(t);
+//! assert_eq!(t, tupleops::concat_tuples(l, r));
+//!
+//! // Splitting tuples given a right side
+//! let (l, r): ((u8, f32), (&str,)) = tuple_split::split_tuple_into_right::<(&str,)>(t);
+//! assert_eq!(t, tupleops::concat_tuples(l, r));
+//!
+//! // Splitting tuples given both sides
+//! let (l, r): ((u8, f32), (&str,)) = tuple_split::split_tuple_into::<(u8, f32), (&str)>(t);
+//! assert_eq!(t, tupleops::concat_tuples(l, r));
 //! ```
 
 use core::marker::Tuple;
 
 use blk_count_macro::count;
-use tupleops::{ConcatTuples, TupleConcat, TupleLength};
+use tupleops::{ConcatTuples, TupleConcat};
 
 /// Type alias [Left](Left) equals [TupleSplit::Left](TupleSplit::Left)
 /// for any tuple which implements [TupleSplit](crate::TupleSplit) at the given MIDDLE.
@@ -79,6 +90,7 @@ where
 ///
 /// ```rust
 /// let t: (u8, f32, &str) = (1, 1.0, "test");
+///
 /// let (l, r): ((u8, f32), (&str,)) = tuple_split::split_tuple_into_left::<(u8, f32)>(t);
 ///
 /// assert_eq!(t, tupleops::concat_tuples(l, r));
