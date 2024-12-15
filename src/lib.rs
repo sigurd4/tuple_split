@@ -60,7 +60,39 @@ pub type Left<T, const MIDDLE: usize> = <T as TupleSplitAt<MIDDLE>>::Left;
 /// for any tuple which implements [TupleSplit](crate::TupleSplit) at the given MIDDLE.
 pub type Right<T, const MIDDLE: usize> = <T as TupleSplitAt<MIDDLE>>::Right;
 
-/// A trait for splitting a tuple up into two specific parts. `L` and `R` must together concatinate to `Self`.
+/// Tuples which may be split at index `MIDDLE` have the trait [TupleSplitAt](crate::TupleSplitAt),
+/// which, when split, returns [TupleSplitAt::Left](TupleSplitAt::Left), [TupleSplitAt::Right](TupleSplitAt::Right).
+///
+/// # Example
+///
+/// ```rust
+/// let t: (u8, f32, &str) = (1, 1.0, "test");
+/// let (l, r): ((u8, f32), (&str,)) = tuple_split::split_tuple_at::<2>(t);
+///
+/// assert_eq!(t, tupleops::concat_tuples(l, r));
+/// ```
+#[diagnostic::on_unimplemented(message = "`{Self}` cannot be split at index `{MIDDLE}`")]
+#[const_trait]
+pub trait TupleSplitAt<const MIDDLE: usize>: Tuple
+{
+    type Left: Tuple;
+    type Right: Tuple;
+
+    fn split_tuple_at(self) -> (Self::Left, Self::Right);
+}
+
+/// A trait for splitting a tuple up into two parts given a specified left part `L` and right part `R`. `L` and `R` must be the left and right part of `Self`.
+///
+/// Tuples will be split into parts `L` and `R`.
+///
+/// # Example
+///
+/// ```rust
+/// let t: (u8, f32, &str) = (1, 1.0, "test");
+///
+/// let (l, r): ((u8, f32), (&str,)) = tuple_split::split_tuple_into_left::<(u8, f32)>(t);
+///
+/// assert_eq!(t, tupleops::concat_tuples(l, r));
 #[diagnostic::on_unimplemented(message = "`{Self}` cannot be split up into `{L}` and `{R}`")]
 #[const_trait]
 pub trait TupleSplitInto<L, R>: ~const TupleSplitIntoLeft<L, Right = R> + ~const TupleSplitIntoRight<R, Left = L>
@@ -80,29 +112,6 @@ where
     {
         self.split_tuple_into_left()
     }
-}
-
-/// A trait for splitting a tuple up into two parts given a specified right part `R`. `R` must be a rightmost segment of `Self`.
-///
-/// Tuples will be split into parts [TupleSplitIntoRight::Left](TupleSplitIntoRight::Left) and `R`.
-///
-/// # Example
-///
-/// ```rust
-/// let t: (u8, f32, &str) = (1, 1.0, "test");
-///
-/// let (l, r): ((u8, f32), (&str,)) = tuple_split::split_tuple_into_left::<(u8, f32)>(t);
-///
-/// assert_eq!(t, tupleops::concat_tuples(l, r));
-#[diagnostic::on_unimplemented(message = "`{R}` is not the right part of `{Self}`")]
-#[const_trait]
-pub trait TupleSplitIntoRight<R>: Tuple
-where
-    R: Tuple
-{
-    type Left: Tuple;
-
-    fn split_tuple_into_right(self) -> (Self::Left, R);
 }
 
 /// A trait for splitting a tuple up into two parts given a specified left part `L`. `L` must be a leftmost segment of `Self`.
@@ -128,25 +137,27 @@ where
     fn split_tuple_into_left(self) -> (L, Self::Right);
 }
 
-/// Tuples which may be split at index `MIDDLE` have the trait [TupleSplitAt](crate::TupleSplitAt),
-/// which, when split, returns [TupleSplitAt::Left](TupleSplitAt::Left), [TupleSplitAt::Right](TupleSplitAt::Right).
+/// A trait for splitting a tuple up into two parts given a specified right part `R`. `R` must be a rightmost segment of `Self`.
+///
+/// Tuples will be split into parts [TupleSplitIntoRight::Left](TupleSplitIntoRight::Left) and `R`.
 ///
 /// # Example
 ///
 /// ```rust
 /// let t: (u8, f32, &str) = (1, 1.0, "test");
-/// let (l, r): ((u8, f32), (&str,)) = tuple_split::split_tuple_at::<2>(t);
+///
+/// let (l, r): ((u8, f32), (&str,)) = tuple_split::split_tuple_into_left::<(u8, f32)>(t);
 ///
 /// assert_eq!(t, tupleops::concat_tuples(l, r));
-/// ```
-#[diagnostic::on_unimplemented(message = "`{Self}` cannot be split at index `{MIDDLE}`")]
+#[diagnostic::on_unimplemented(message = "`{R}` is not the right part of `{Self}`")]
 #[const_trait]
-pub trait TupleSplitAt<const MIDDLE: usize>: Tuple
+pub trait TupleSplitIntoRight<R>: Tuple
+where
+    R: Tuple
 {
     type Left: Tuple;
-    type Right: Tuple;
 
-    fn split_tuple_at(self) -> (Self::Left, Self::Right);
+    fn split_tuple_into_right(self) -> (Self::Left, R);
 }
 
 /// Splits tuple at a given index.
@@ -173,7 +184,18 @@ where
     tuple.split_tuple_at()
 }
 
-/// Splits tuple into two given tuples.
+/// A trait for splitting a tuple up into two parts given a specified left part `L` and right part `R`. `L` and `R` must be the left and right part of `Self`.
+///
+/// Tuples will be split into parts `L` and `R`.
+///
+/// # Example
+///
+/// ```rust
+/// let t: (u8, f32, &str) = (1, 1.0, "test");
+///
+/// let (l, r): ((u8, f32), (&str,)) = tuple_split::split_tuple_into_left::<(u8, f32)>(t);
+///
+/// assert_eq!(t, tupleops::concat_tuples(l, r));
 pub const fn split_tuple_into<L, R>(tuple: ConcatTuples<L, R>) -> (L, R)
 where
     L: Tuple,
@@ -184,6 +206,18 @@ where
     tuple.split_tuple_into()
 }
 
+/// Splits a tuple up into two parts given a specified left part `L`. `L` must be a leftmost segment of `Self`.
+///
+/// Tuples will be split into parts `L` and [TupleSplitIntoLeft::Right](TupleSplitIntoLeft::Right).
+///
+/// # Example
+///
+/// ```rust
+/// let t: (u8, f32, &str) = (1, 1.0, "test");
+/// let (l, r): ((u8, f32), (&str,)) = tuple_split::split_tuple_into_left::<(u8, f32)>(t);
+///
+/// assert_eq!(t, tupleops::concat_tuples(l, r));
+/// ```
 pub const fn split_tuple_into_left<L, T>(tuple: T) -> (L, T::Right)
 where
     L: Tuple,
@@ -192,6 +226,18 @@ where
     tuple.split_tuple_into_left()
 }
 
+/// Splits a tuple up into two parts given a specified right part `R`. `R` must be a rightmost segment of `Self`.
+///
+/// Tuples will be split into parts [TupleSplitIntoRight::Left](TupleSplitIntoRight::Left) and `R`.
+///
+/// # Example
+///
+/// ```rust
+/// let t: (u8, f32, &str) = (1, 1.0, "test");
+///
+/// let (l, r): ((u8, f32), (&str,)) = tuple_split::split_tuple_into_left::<(u8, f32)>(t);
+///
+/// assert_eq!(t, tupleops::concat_tuples(l, r));
 pub const fn split_tuple_into_right<R, T>(tuple: T) -> (T::Left, R)
 where
     R: Tuple,
