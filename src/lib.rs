@@ -17,38 +17,119 @@
 //! Tuples which may be split at index MIDDLE have the trait [TupleSplit](crate::TupleSplit)<MIDDLE>,
 //! which, when split, returns ([TupleSplit::Left](TupleSplit::Left), [TupleSplit::Right](TupleSplit::Right)).
 //!
-//! They can lso be split by specifying either of the sides or both.
+//! They can also be split by specifying either of the sides or both.
 //!
 //! ```rust
 //! #![feature(generic_const_exprs)]
 //!
-//! let t: (u8, f32, &str) = (32, 0.707, "test");
+//! let t = (32, 0.707, "test");
 //!
 //! // Splitting tuples by index
-//! let (l, r): ((), (u8, f32, &str)) = tuple_split::split_tuple_at::<0, _>(t);
+//! let (l, r) = tuple_split::split_tuple_at::<0, _>(t);
 //! assert_eq!(t, tupleops::concat_tuples(l, r));
 //!
-//! let (l, r): ((u8,), (f32, &str)) = tuple_split::split_tuple_at::<1, _>(t);
+//! let (l, r) = tuple_split::split_tuple_at::<1, _>(t);
 //! assert_eq!(t, tupleops::concat_tuples(l, r));
 //!
-//! let (l, r): ((u8, f32), (&str,)) = tuple_split::split_tuple_at::<2, _>(t);
+//! let (l, r) = tuple_split::split_tuple_at::<2, _>(t);
 //! assert_eq!(t, tupleops::concat_tuples(l, r));
 //!
-//! let (l, r): ((u8, f32, &str), ()) = tuple_split::split_tuple_at::<3, _>(t);
+//! let (l, r) = tuple_split::split_tuple_at::<3, _>(t);
 //! assert_eq!(t, tupleops::concat_tuples(l, r));
 //!
 //! // Splitting tuples given a left side
-//! let (l, r): ((u8, f32), (&str,)) = tuple_split::split_tuple_into_left::<(u8, f32), _>(t);
+//! let (l, r) = tuple_split::split_tuple_into_left::<(u8, f32), _>(t);
 //! assert_eq!(t, tupleops::concat_tuples(l, r));
 //!
 //! // Splitting tuples given a right side
-//! let (l, r): ((u8, f32), (&str,)) = tuple_split::split_tuple_into_right::<(&str,), _>(t);
+//! let (l, r) = tuple_split::split_tuple_into_right::<(&str,), _>(t);
 //! assert_eq!(t, tupleops::concat_tuples(l, r));
 //!
 //! // Splitting tuples given both sides
-//! let (l, r): ((u8, f32), (&str,)) = tuple_split::split_tuple_into::<(u8, f32), (&str,)>(t);
+//! let (l, r) = tuple_split::split_tuple_into::<(u8, f32), (&str,)>(t);
 //! assert_eq!(t, tupleops::concat_tuples(l, r));
 //! ```
+//!
+//! # Split by index
+//!
+//! Tuples can be split by a const-generic index. To use this feature, put `#![feature(generic_const_exprs)]` on the top of your `lib.rs` or `main.rs`.
+//!
+//! ## Example
+//!
+//! ```rust
+//! #![feature(generic_const_exprs)]
+//!
+//! let t = (1, 1.0, "test");
+//!
+//! let (l, r) = tuple_split::split_tuple_at::<2, _>(t);
+//!
+//! assert_eq!(t, tupleops::concat_tuples(l, r));
+//! ```
+//!
+//! # Split by type
+//!
+//! The type of tuple you want from the split operation can be used instead of an index. This does not require `#![feature(generic_const_exprs)]`. Either the left, right
+//! or both can be provided as a generic type.
+//!
+//! ## Examples
+//!
+//! ### Left
+//!
+//! ```rust
+//! let t = (1, 1.0, "test");
+//!
+//! let (l, r) = tuple_split::split_tuple_into_left::<(u8, f32), _>(t);
+//!
+//! assert_eq!(t, tupleops::concat_tuples(l, r));
+//! ```
+//!
+//! ### Right
+//!
+//! ```rust
+//! let t = (1, 1.0, "test");
+//!
+//! let (l, r) = tuple_split::split_tuple_into_right::<(&str,), _>(t);
+//!
+//! assert_eq!(t, tupleops::concat_tuples(l, r));
+//! ```
+//!
+//! ### Both
+//!
+//! ```rust
+//! let t = (1, 1.0, "test");
+//!
+//! let (l, r) = tuple_split::split_tuple_into::<(u8, f32), (&str,)>(t);
+//!
+//! assert_eq!(t, tupleops::concat_tuples(l, r));
+//! ```
+//!
+//! # Tuple sizes
+//!
+//! By default, this crate operates with tuples of up to 4 elements, just like the [tupleops](https://crates.io/crates/tupleops) crate. If you need to use bigger tuples, use the features `8`, `16`, `32`, `64`, `96`, `128`, `160`, `192` or `224` to set the maximum supported tuple size.
+//!
+//! If you are using this crate in another crate, it's a nice gesture to provide this tuple size interface to the end user upstream as well. It can be done like this in
+//! the `Cargo.toml`:
+//!
+//! ```toml
+//! [features]
+//! default = []
+//! dont_hurt_yourself_by_using_all_features = ["tuple_split/dont_hurt_yourself_by_using_all_features"]
+//! 8 = ["tuple_split/8"]
+//! 16 = ["8", "tuple_split/16"]
+//! 32 = ["16", "tuple_split/32"]
+//! 64 = ["32", "tuple_split/64"]
+//! 96 = ["64", "tuple_split/96"]
+//! 128 = ["96", "tuple_split/128"]
+//! 160 = ["128", "tuple_split/160"]
+//! 192 = ["160", "tuple_split/192"]
+//! 224 = ["192", "tuple_split/224"]
+//! 256 = ["224", "tuple_split/256"]
+//! ```
+//!
+//! The `dont_hurt_yourself_by_using_all_features` is there to prevent usage of tuples bigger than 8 if cargo is ran with the flag `--all-features`. Using a tuple size
+//! above 16 is highly discouraged as it will make compilation time unbearably long. Compilation time will increase exponentially. You have been warned.
+
+pub use tupleops;
 
 use core::marker::Tuple;
 
@@ -70,8 +151,9 @@ pub type Right<T, const MIDDLE: usize> = <T as TupleSplitAt<MIDDLE>>::Right;
 /// ```rust
 /// #![feature(generic_const_exprs)]
 ///
-/// let t: (u8, f32, &str) = (1, 1.0, "test");
-/// let (l, r): ((u8, f32), (&str,)) = tuple_split::split_tuple_at::<2, _>(t);
+/// let t = (1, 1.0, "test");
+///
+/// let (l, r) = tuple_split::split_tuple_at::<2, _>(t);
 ///
 /// assert_eq!(t, tupleops::concat_tuples(l, r));
 /// ```
@@ -92,11 +174,12 @@ pub trait TupleSplitAt<const MIDDLE: usize>: Tuple
 /// # Example
 ///
 /// ```rust
-/// let t: (u8, f32, &str) = (1, 1.0, "test");
+/// let t = (1, 1.0, "test");
 ///
-/// let (l, r): ((u8, f32), (&str,)) = tuple_split::split_tuple_into::<(u8, f32), (&str,)>(t);
+/// let (l, r) = tuple_split::split_tuple_into::<(u8, f32), (&str,)>(t);
 ///
 /// assert_eq!(t, tupleops::concat_tuples(l, r));
+/// ```
 #[diagnostic::on_unimplemented(message = "`{Self}` cannot be split up into `{L}` and `{R}`")]
 #[const_trait]
 pub trait TupleSplitInto<L, R>: ~const TupleSplitIntoLeft<L, Right = R> + ~const TupleSplitIntoRight<R, Left = L>
@@ -126,8 +209,9 @@ where
 /// # Example
 ///
 /// ```rust
-/// let t: (u8, f32, &str) = (1, 1.0, "test");
-/// let (l, r): ((u8, f32), (&str,)) = tuple_split::split_tuple_into_left::<(u8, f32), _>(t);
+/// let t = (1, 1.0, "test");
+///
+/// let (l, r) = tuple_split::split_tuple_into_left::<(u8, f32), _>(t);
 ///
 /// assert_eq!(t, tupleops::concat_tuples(l, r));
 /// ```
@@ -149,11 +233,12 @@ where
 /// # Example
 ///
 /// ```rust
-/// let t: (u8, f32, &str) = (1, 1.0, "test");
+/// let t = (1, 1.0, "test");
 ///
-/// let (l, r): ((u8, f32), (&str,)) = tuple_split::split_tuple_into_left::<(u8, f32), _>(t);
+/// let (l, r) = tuple_split::split_tuple_into_right::<(&str,), _>(t);
 ///
 /// assert_eq!(t, tupleops::concat_tuples(l, r));
+/// ```
 #[diagnostic::on_unimplemented(message = "`{R}` is not the right part of `{Self}`")]
 #[const_trait]
 pub trait TupleSplitIntoRight<R>: Tuple
@@ -176,8 +261,9 @@ where
 /// ```rust
 /// #![feature(generic_const_exprs)]
 ///
-/// let t: (u8, f32, &str) = (1, 1.0, "test");
-/// let (l, r): ((u8, f32), (&str,)) = tuple_split::split_tuple_at::<2, _>(t);
+/// let t = (1, 1.0, "test");
+///
+/// let (l, r) = tuple_split::split_tuple_at::<2, _>(t);
 ///
 /// assert_eq!(t, tupleops::concat_tuples(l, r));
 /// ```
@@ -195,11 +281,12 @@ where
 /// # Example
 ///
 /// ```rust
-/// let t: (u8, f32, &str) = (1, 1.0, "test");
+/// let t = (1, 1.0, "test");
 ///
-/// let (l, r): ((u8, f32), (&str,)) = tuple_split::split_tuple_into::<(u8, f32), (&str,)>(t);
+/// let (l, r) = tuple_split::split_tuple_into::<(u8, f32), (&str,)>(t);
 ///
 /// assert_eq!(t, tupleops::concat_tuples(l, r));
+/// ```
 pub const fn split_tuple_into<L, R>(tuple: ConcatTuples<L, R>) -> (L, R)
 where
     L: Tuple,
@@ -217,8 +304,9 @@ where
 /// # Example
 ///
 /// ```rust
-/// let t: (u8, f32, &str) = (1, 1.0, "test");
-/// let (l, r): ((u8, f32), (&str,)) = tuple_split::split_tuple_into_left::<(u8, f32), _>(t);
+/// let t = (1, 1.0, "test");
+///
+/// let (l, r) = tuple_split::split_tuple_into_left::<(u8, f32), _>(t);
 ///
 /// assert_eq!(t, tupleops::concat_tuples(l, r));
 /// ```
@@ -237,11 +325,12 @@ where
 /// # Example
 ///
 /// ```rust
-/// let t: (u8, f32, &str) = (1, 1.0, "test");
+/// let t = (1, 1.0, "test");
 ///
-/// let (l, r): ((u8, f32), (&str,)) = tuple_split::split_tuple_into_left::<(u8, f32), _>(t);
+/// let (l, r) = tuple_split::split_tuple_into_right::<(&str,), _>(t);
 ///
 /// assert_eq!(t, tupleops::concat_tuples(l, r));
+/// ```
 pub const fn split_tuple_into_right<R, T>(tuple: T) -> (T::Left, R)
 where
     R: Tuple,
