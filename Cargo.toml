@@ -31,5 +31,5 @@ max-len = ["256"]
 dont_hurt_yourself_by_using_all_features = ["tupleops/dont_hurt_yourself_by_using_all_features"]
 
 [dependencies]
-tupleops = {version = "0.1.1", features = ["concat"]}
+tupleops = {version = "0.1.1", default-features = false, features = ["concat"]}
 blk_count_macro = "0.1.1"

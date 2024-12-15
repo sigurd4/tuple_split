@@ -108,8 +108,6 @@
 //! Using a tuple size above 16 is highly discouraged as it will make compilation time unbearably long. Compilation time will increase exponentially.
 //! You have been warned.
 
-pub use tupleops;
-
 use core::marker::Tuple;
 
 use blk_count_macro::count;
