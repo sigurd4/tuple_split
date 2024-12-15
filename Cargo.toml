@@ -10,9 +10,14 @@ repository = "https://github.com/sigurd4/tuple_split"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[lib]
+name = "tuple_split"
+
 [features]
-default = ["16"]
-dont_hurt_yourself_by_using_all_features = ["tupleops/dont_hurt_yourself_by_using_all_features"]
+default = ["default-len"]
+default-len = ["16"]
+max-len = ["256"]
+
 8 = ["tupleops/8"]
 16 = ["8", "tupleops/16"]
 32 = ["16", "tupleops/32"]
@@ -23,7 +28,7 @@ dont_hurt_yourself_by_using_all_features = ["tupleops/dont_hurt_yourself_by_usin
 192 = ["160", "tupleops/192"]
 224 = ["192", "tupleops/224"]
 256 = ["224", "tupleops/256"]
-
+dont_hurt_yourself_by_using_all_features = ["tupleops/dont_hurt_yourself_by_using_all_features"]
 
 [dependencies]
 tupleops = {version = "0.1.1", features = ["concat"]}

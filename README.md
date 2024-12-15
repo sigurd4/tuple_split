@@ -103,24 +103,6 @@ assert_eq!(t, tupleops::concat_tuples(l, r));
 
 ## Tuple sizes
 
-By default, this crate operates with tuples of up to 4 elements, just like the [tupleops](https://crates.io/crates/tupleops) crate. If you need to use bigger tuples, use the features `8`, `16`, `32`, `64`, `96`, `128`, `160`, `192`, `224` or `256` to set the maximum supported tuple size.
-
-If you are using this crate in another crate, it's a nice gesture to provide this tuple size interface to the end user upstream as well. It can be done like this in the `Cargo.toml`:
-
-```toml
-[features]
-default = []
-dont_hurt_yourself_by_using_all_features = ["tuple_split/dont_hurt_yourself_by_using_all_features"]
-8 = ["tuple_split/8"]
-16 = ["8", "tuple_split/16"]
-32 = ["16", "tuple_split/32"]
-64 = ["32", "tuple_split/64"]
-96 = ["64", "tuple_split/96"]
-128 = ["96", "tuple_split/128"]
-160 = ["128", "tuple_split/160"]
-192 = ["160", "tuple_split/192"]
-224 = ["192", "tuple_split/224"]
-256 = ["224", "tuple_split/256"]
-```
+By default, this crate operates with tuples of up to 16 elements, just like the [tupleops](https://crates.io/crates/tupleops) crate. If you want to use differently sized tuples, use the features `8`, `16`, `32`, `64`, `96`, `128`, `160`, `192`, `224` or `256` to set the maximum supported tuple size.
 
 The `dont_hurt_yourself_by_using_all_features` is there to prevent usage of tuples bigger than 8 if `cargo` is ran with the flag `--all-features`. Using a tuple size above 16 is highly discouraged as it will make compilation time unbearably long. Compilation time will increase exponentially. You have been warned.
