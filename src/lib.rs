@@ -4,7 +4,7 @@
 #![feature(const_trait_impl)]
 #![feature(const_precise_live_drops)]
 #![feature(tuple_trait)]
-#![cfg_attr(feature = "128", recursion_limit = "256")]
+#![recursion_limit = "512"]
 
 //!
 //! This crate an extension for the [tupleops](tupleops) crate.
