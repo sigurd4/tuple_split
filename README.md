@@ -20,11 +20,6 @@ This crate an extension for the [tupleops](https://crates.io/crates/tupleops) cr
 
 ## Examples
 
-Tuples which may be split at index MIDDLE have the trait `TupleSplit`,
-which, when split, returns `TupleSplit::Left`, `TupleSplit::Right`.
-
-They can also be split by specifying either of the sides or both.
-
 ```rust
 let t = (32, 0.707, "test");
 

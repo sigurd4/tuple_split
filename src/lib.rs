@@ -14,11 +14,6 @@
 //!
 //! # Examples
 //!
-//! Tuples which may be split at index MIDDLE have the trait [TupleSplit](crate::TupleSplit)<MIDDLE>,
-//! which, when split, returns ([TupleSplit::Left](TupleSplit::Left), [TupleSplit::Right](TupleSplit::Right)).
-//!
-//! They can also be split by specifying either of the sides or both.
-//!
 //! ```rust
 //! #![feature(generic_const_exprs)]
 //!
