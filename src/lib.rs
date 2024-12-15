@@ -20,6 +20,8 @@
 //! They can lso be split by specifying either of the sides or both.
 //!
 //! ```rust
+//! #![feature(generic_const_exprs)]
+//!
 //! let t: (u8, f32, &str) = (32, 0.707, "test");
 //!
 //! // Splitting tuples by index
@@ -36,15 +38,15 @@
 //! assert_eq!(t, tupleops::concat_tuples(l, r));
 //!
 //! // Splitting tuples given a left side
-//! let (l, r): ((u8, f32), (&str,)) = tuple_split::split_tuple_into_left::<(u8, f32)>(t);
+//! let (l, r): ((u8, f32), (&str,)) = tuple_split::split_tuple_into_left::<(u8, f32), _>(t);
 //! assert_eq!(t, tupleops::concat_tuples(l, r));
 //!
 //! // Splitting tuples given a right side
-//! let (l, r): ((u8, f32), (&str,)) = tuple_split::split_tuple_into_right::<(&str,)>(t);
+//! let (l, r): ((u8, f32), (&str,)) = tuple_split::split_tuple_into_right::<(&str,), _>(t);
 //! assert_eq!(t, tupleops::concat_tuples(l, r));
 //!
 //! // Splitting tuples given both sides
-//! let (l, r): ((u8, f32), (&str,)) = tuple_split::split_tuple_into::<(u8, f32), (&str)>(t);
+//! let (l, r): ((u8, f32), (&str,)) = tuple_split::split_tuple_into::<(u8, f32), (&str,)>(t);
 //! assert_eq!(t, tupleops::concat_tuples(l, r));
 //! ```
 
@@ -66,8 +68,10 @@ pub type Right<T, const MIDDLE: usize> = <T as TupleSplitAt<MIDDLE>>::Right;
 /// # Example
 ///
 /// ```rust
+/// #![feature(generic_const_exprs)]
+///
 /// let t: (u8, f32, &str) = (1, 1.0, "test");
-/// let (l, r): ((u8, f32), (&str,)) = tuple_split::split_tuple_at::<2>(t);
+/// let (l, r): ((u8, f32), (&str,)) = tuple_split::split_tuple_at::<2, _>(t);
 ///
 /// assert_eq!(t, tupleops::concat_tuples(l, r));
 /// ```
@@ -90,7 +94,7 @@ pub trait TupleSplitAt<const MIDDLE: usize>: Tuple
 /// ```rust
 /// let t: (u8, f32, &str) = (1, 1.0, "test");
 ///
-/// let (l, r): ((u8, f32), (&str,)) = tuple_split::split_tuple_into_left::<(u8, f32)>(t);
+/// let (l, r): ((u8, f32), (&str,)) = tuple_split::split_tuple_into::<(u8, f32), (&str,)>(t);
 ///
 /// assert_eq!(t, tupleops::concat_tuples(l, r));
 #[diagnostic::on_unimplemented(message = "`{Self}` cannot be split up into `{L}` and `{R}`")]
@@ -102,6 +106,7 @@ where
 {
     fn split_tuple_into(self) -> (L, R);
 }
+
 impl<T, L, R> const TupleSplitInto<L, R> for T
 where
     Self: ~const TupleSplitIntoLeft<L, Right = R> + ~const TupleSplitIntoRight<R, Left = L>,
@@ -122,7 +127,7 @@ where
 ///
 /// ```rust
 /// let t: (u8, f32, &str) = (1, 1.0, "test");
-/// let (l, r): ((u8, f32), (&str,)) = tuple_split::split_tuple_into_left::<(u8, f32)>(t);
+/// let (l, r): ((u8, f32), (&str,)) = tuple_split::split_tuple_into_left::<(u8, f32), _>(t);
 ///
 /// assert_eq!(t, tupleops::concat_tuples(l, r));
 /// ```
@@ -146,7 +151,7 @@ where
 /// ```rust
 /// let t: (u8, f32, &str) = (1, 1.0, "test");
 ///
-/// let (l, r): ((u8, f32), (&str,)) = tuple_split::split_tuple_into_left::<(u8, f32)>(t);
+/// let (l, r): ((u8, f32), (&str,)) = tuple_split::split_tuple_into_left::<(u8, f32), _>(t);
 ///
 /// assert_eq!(t, tupleops::concat_tuples(l, r));
 #[diagnostic::on_unimplemented(message = "`{R}` is not the right part of `{Self}`")]
@@ -169,13 +174,12 @@ where
 /// Returns `([TupleSplitAt::Left](TupleSplitAt::Left), [TupleSplitAt::Right](TupleSplitAt::Right))` for the given Tuple and `MIDDLE`.
 ///
 /// ```rust
-/// use tupleops::concat_tuples;
-/// use tuple_split::*;
+/// #![feature(generic_const_exprs)]
 ///
 /// let t: (u8, f32, &str) = (1, 1.0, "test");
-/// let (l, r): ((u8, f32), (&str,)) = split_tuple_at::<2, _>(t);
+/// let (l, r): ((u8, f32), (&str,)) = tuple_split::split_tuple_at::<2, _>(t);
 ///
-/// assert_eq!(t, concat_tuples(l, r));
+/// assert_eq!(t, tupleops::concat_tuples(l, r));
 /// ```
 pub const fn split_tuple_at<const MIDDLE: usize, T>(tuple: T) -> (T::Left, T::Right)
 where
@@ -193,7 +197,7 @@ where
 /// ```rust
 /// let t: (u8, f32, &str) = (1, 1.0, "test");
 ///
-/// let (l, r): ((u8, f32), (&str,)) = tuple_split::split_tuple_into_left::<(u8, f32)>(t);
+/// let (l, r): ((u8, f32), (&str,)) = tuple_split::split_tuple_into::<(u8, f32), (&str,)>(t);
 ///
 /// assert_eq!(t, tupleops::concat_tuples(l, r));
 pub const fn split_tuple_into<L, R>(tuple: ConcatTuples<L, R>) -> (L, R)
@@ -214,7 +218,7 @@ where
 ///
 /// ```rust
 /// let t: (u8, f32, &str) = (1, 1.0, "test");
-/// let (l, r): ((u8, f32), (&str,)) = tuple_split::split_tuple_into_left::<(u8, f32)>(t);
+/// let (l, r): ((u8, f32), (&str,)) = tuple_split::split_tuple_into_left::<(u8, f32), _>(t);
 ///
 /// assert_eq!(t, tupleops::concat_tuples(l, r));
 /// ```
@@ -235,7 +239,7 @@ where
 /// ```rust
 /// let t: (u8, f32, &str) = (1, 1.0, "test");
 ///
-/// let (l, r): ((u8, f32), (&str,)) = tuple_split::split_tuple_into_left::<(u8, f32)>(t);
+/// let (l, r): ((u8, f32), (&str,)) = tuple_split::split_tuple_into_left::<(u8, f32), _>(t);
 ///
 /// assert_eq!(t, tupleops::concat_tuples(l, r));
 pub const fn split_tuple_into_right<R, T>(tuple: T) -> (T::Left, R)
