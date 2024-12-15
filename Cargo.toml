@@ -1,11 +1,11 @@
 [package]
 name = "tuple_split"
-version = "0.2.1"
+version = "0.2.2"
 edition = "2021"
 license = "MIT"
 keywords = ["tuples", "split", "tupleops", "const", "utility"]
 categories = ["rust-patterns", "no-std::no-alloc"]
-description = "An extension for the tupleops crate which adds a trait for splitting tuples by an index."
+description = "An extension for the tupleops crate which adds a trait for splitting tuples."
 repository = "https://github.com/sigurd4/tuple_split"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
